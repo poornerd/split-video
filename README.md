@@ -39,3 +39,7 @@ An *example* would be:
 - starts with "part"
 - followed by "_XX_" - a number preceeded by 0 so that when the files are sorted they are in the right order
 - a keyword(s) which describes the clip, with "_" for spaces.  The only relevant keyword is **goal** because those clips get added to a separate highlight video of just goals.
+
+## Usage
+In the directory with the videos, and the ```input.txt```:
+```./split.sh```
