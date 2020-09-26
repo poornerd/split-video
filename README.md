@@ -37,7 +37,7 @@ An *example* would be:
 
 **It is important to follow the naming convention for the clips!**
 - starts with "part"
-- followed by "_XX_" - a number preceeded by 0 so that when the files are sorted they are in the right order
+- followed by "_XX_" - a number (preceeded by 0 if it is a single digit) so that when the files are sorted they are in the right order
 - a keyword(s) which describes the clip, with "_" for spaces.  The only relevant keyword is **goal** because those clips get added to a separate highlight video of just goals.
 
 ## Usage
