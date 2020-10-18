@@ -1,6 +1,4 @@
 # Python Split Video
 
 ## Dependencies
-```
-pip3 install moviepy --user
-```
+Install ffmpeg (see README)
