@@ -51,8 +51,8 @@ def create_goals_film():
         file1.write("file %s\n" %item);
     file1.close();
 
-    highlight_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist.txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", "goals.MOV"];
-    subprocess.check_output(highlight_cmd);
+    goals_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist.txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", "goals.MOV"];
+    subprocess.check_output(goals_cmd);
 
 cleanup();
 split("input.txt");
