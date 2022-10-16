@@ -26,10 +26,18 @@ def split(fname):
         for words in times:
             line_count = line_count + 1;
             print(words);
-            output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + "_x.MOV";
+            output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".MOV";
             if not os.path.exists(output_filename) :
-                split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080", "-vf", "loop=30:1", output_filename];
-                subprocess.check_output(split_cmd);
+                if words[4] and words[5]:
+                    arrow_cmd = ["-vf", "drawtext=text='^':enable='between(t,0,.3)':x=" + words[4] + ":y=" + words[5] + ":fontsize=66:fontcolor=red,loop=40:1"];
+                else:
+                    arrow_cmd = ["-vf", "loop=40:1"];
+                split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080"];
+                output_cmd = [ output_filename];
+                # split_cmd.append(arrow_cmd);
+                subprocess.check_output(split_cmd + arrow_cmd + output_cmd);
+                # highlight_cmd = ["ffmpeg", "-y", "-i", output_filename, "-vf", "drawtext=text='^':x=1140:y=260:fontsize=66:fontcolor=red", "-c:a", "copy", "O_" + output_filename];
+                # subprocess.check_output(highlight_cmd);
                 reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
                 subprocess.check_output(reencode_cmd);
 
