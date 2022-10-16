@@ -95,11 +95,14 @@ if sys.argv[1]:
         cleanup();
         if sys.argv[2]:
             input_filename= sys.argv[2];
+        if sys.argv[3]:
+            reel_type= sys.argv[3];
     else:
         input_filename = param_1;
+        if sys.argv[2]:
+            reel_type= sys.argv[2];
+        else:
+            reel_type= "highlight";
 
 split(input_filename);
-create_highlight_film("highlight");
-##create_goals_film();
-##create_highlight_film("nicholas");
-##create_highlight_film("team");
+create_highlight_film(reel_type);
