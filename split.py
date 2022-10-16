@@ -15,6 +15,8 @@ def cleanup():
         os.remove(f);
     for f in glob.glob("tmp_part*.mov"):
         os.remove(f);
+    for f in glob.glob("tmp_part*.JPG"):
+        os.remove(f);          
 
 # split files
 def split(fname):
@@ -25,12 +27,15 @@ def split(fname):
             line_count = line_count + 1;
             print(words);
             output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".MOV";
+            output_image_filename = "tmp_part_" + str(line_count).zfill(4) + "_" + words[3] + ".JPG";
             if not os.path.exists(output_filename) :
                 split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080", output_filename];
                 subprocess.check_output(split_cmd);
     ##            reencode_cmd = ["ffmpeg", "-i", output_filename, "tmp_" + output_filename]
                 reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
                 subprocess.check_output(reencode_cmd);
+                extract_img_cmd = ["ffmpeg",  "-i",  "tmp_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  output_image_filename];
+                subprocess.check_output(extract_img_cmd);
 
 #-acodec libvo_aacenc -vcodec libx264 -s 1920x1080 -r 60 -strict experimental 1.mp4
 
