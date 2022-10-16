@@ -3,6 +3,7 @@ import subprocess
 import os
 import glob
 import csv
+import sys
 
 # cleanup
 def cleanup():
@@ -70,13 +71,24 @@ def create_highlight_film(name):
     files = sorted(list(glob.glob("tmp_part*"+name+"*.MOV"))+ list(glob.glob("tmp_part*"+name+"*.mov")));
     for item in files:
         file1.write("file %s\n" %item);
+        # if item.endswith(".JPG") :
+        #    file1.write("duration 1\n");   
     file1.close();
 
     goals_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_"+name+".txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", filmname];
     subprocess.check_output(goals_cmd);
 
 ##cleanup();
-split("teutonia.csv");
+if sys.argv[1]:
+    param_1= sys.argv[1];
+    if param_1 == "clean":
+        cleanup();
+        if sys.argv[2]:
+            input_filename= sys.argv[2];
+    else:
+        input_filename = param_1;
+
+split(input_filename);
 create_highlight_film("highlight");
 ##create_goals_film();
 ##create_highlight_film("nicholas");
