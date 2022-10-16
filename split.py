@@ -26,18 +26,12 @@ def split(fname):
         for words in times:
             line_count = line_count + 1;
             print(words);
-            output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".MOV";
-            output_image_filename = "tmp_part_" + str(line_count).zfill(4) + "_" + words[3] + ".JPG";
+            output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + "_x.MOV";
             if not os.path.exists(output_filename) :
-                split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080", output_filename];
+                split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080", "-vf", "loop=30:1", output_filename];
                 subprocess.check_output(split_cmd);
-    ##            reencode_cmd = ["ffmpeg", "-i", output_filename, "tmp_" + output_filename]
                 reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
                 subprocess.check_output(reencode_cmd);
-                extract_img_cmd = ["ffmpeg",  "-i",  "tmp_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  output_image_filename];
-                subprocess.check_output(extract_img_cmd);
-
-#-acodec libvo_aacenc -vcodec libx264 -s 1920x1080 -r 60 -strict experimental 1.mp4
 
 # create the highlight file
 def create_highlight_film():
@@ -82,6 +76,9 @@ def create_highlight_film(name):
 
     goals_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_"+name+".txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", filmname];
     subprocess.check_output(goals_cmd);
+
+    reencode_cmd = ["ffmpeg", "-y", "-i", filmname, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "160k", "-vf", "format=yuv420p", "-movflags", "+faststart", "final_" + filmname];
+    subprocess.check_output(reencode_cmd);
 
 ##cleanup();
 if sys.argv[1]:
