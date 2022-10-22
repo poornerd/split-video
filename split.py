@@ -32,18 +32,20 @@ def split(fname):
             highlight_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".jpg";
             if not os.path.exists(output_filename) :
                 if words[4] and words[5]:
-                    arrow_cmd = ["-vf", "drawtext=text='^':enable='between(t,0,.2)':x=" + words[4] + ":y=" + words[5] + ":fontsize=166:fontcolor=red,loop=40:1"];
+                    arrow_cmd = ["-vf", "drawtext=text='^':enable='between(t,0,.2)':x=" + words[4] + ":y=" + words[5] + ":fontsize=166:fontcolor=red,loop=40:1,format=yuv420p"];
                 else:
-                    arrow_cmd = ["-vf", "loop=40:1"];
-                split_cmd = ["ffmpeg", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080"];
+                    arrow_cmd = ["-vf", "loop=40:1,format=yuv420p"];
+                split_cmd = ["ffmpeg", "-hwaccel", "auto", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080"];
+                reencode_cmd = ["-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "600k", "-movflags", "+faststart"];
+
                 output_cmd = [ output_filename];
                 # split_cmd.append(arrow_cmd);
-                subprocess.check_output(split_cmd + arrow_cmd + output_cmd);
+                subprocess.check_output(split_cmd + arrow_cmd + reencode_cmd + output_cmd);
 
                 # replicate final re-encode by adding to the split? 
                 # and skip this encode?
-                reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
-                subprocess.check_output(reencode_cmd);
+                ## reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
+                ## subprocess.check_output(reencode_cmd);
 
                 x= 960;
                 if words[4]:
@@ -52,11 +54,11 @@ def split(fname):
                 if words[5]:    
                     y = int(words[5]);
                 highlight_cmd = ["ffmpeg", "-y", "-i", "tmp_" + output_filename, "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-c:a", "copy", "tmp2_" + output_filename];
-                subprocess.check_output(highlight_cmd);
+                ## subprocess.check_output(highlight_cmd);
 
                 extract_img_cmd = ["ffmpeg",  "-i",  "tmp2_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  highlight_filename];
-                subprocess.check_output(extract_img_cmd);
-                os.remove("tmp2_" + output_filename); 
+                #subprocess.check_output(extract_img_cmd);
+                #os.remove("tmp2_" + output_filename); 
 
 # create the highlight file
 def create_highlight_film():
@@ -102,7 +104,7 @@ def create_highlight_film(name):
     highlight_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_"+name+".txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", filmname];
     subprocess.check_output(highlight_cmd);
 
-    reencode_cmd = ["ffmpeg", "-y", "-i", filmname, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "160k", "-vf", "format=yuv420p", "-movflags", "+faststart", "final_" + filmname];
+    reencode_cmd = ["ffmpeg", "-hwaccel", "auto", "-y", "-i", filmname, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "600k", "-vf", "format=yuv420p", "-movflags", "+faststart", "final_" + filmname];
     subprocess.check_output(reencode_cmd);
 
 ##cleanup();
