@@ -53,12 +53,12 @@ def split(fname):
                 y = 540;
                 if words[5]:    
                     y = int(words[5]);
-                highlight_cmd = ["ffmpeg", "-y", "-i", "tmp_" + output_filename, "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-c:a", "copy", "tmp2_" + output_filename];
-                ## subprocess.check_output(highlight_cmd);
+                highlight_cmd = ["ffmpeg","-hwaccel", "auto", "-y", "-i", output_filename, "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':enable='between(t,0,.01)':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-c:a", "copy", "tmp_" + output_filename];
+                subprocess.check_output(highlight_cmd);
 
-                extract_img_cmd = ["ffmpeg",  "-i",  "tmp2_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  highlight_filename];
-                #subprocess.check_output(extract_img_cmd);
-                #os.remove("tmp2_" + output_filename); 
+                extract_img_cmd = ["ffmpeg","-hwaccel", "auto",  "-i",  "tmp_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  highlight_filename];
+                subprocess.check_output(extract_img_cmd);
+                os.remove("tmp_" + output_filename); 
 
 # create the highlight file
 def create_highlight_film():
