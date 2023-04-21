@@ -88,8 +88,9 @@ elif args.clean:
     cleanup()
 
 input_filename = args.input_filename
-reel_type = args.reel_type
-
 split(input_filename);
-create_highlight_film(reel_type);
+
+if args.reel_type:
+    reel_type = args.reel_type
+    create_highlight_film(reel_type);
 
