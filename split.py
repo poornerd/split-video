@@ -7,7 +7,7 @@ import sys
 import argparse
 
 from cleanup import cleanup               
-
+from highlight import create_highlight_film
 # split files
 def split(fname):
     with open(fname) as f:
@@ -23,7 +23,7 @@ def split(fname):
                 if words[4] and words[5]:
                     arrow_cmd = ["-vf", "drawtext=text='^':enable='between(t,0,.2)':x=" + words[4] + ":y=" + words[5] + ":fontsize=166:fontcolor=red,loop=40:1,format=yuv420p"];
                 else:
-                    arrow_cmd = ["-vf", "loop=40:1,format=yuv420p"];
+                    arrow_cmd = ["-vf", "format=yuv420p"];
                 split_cmd = ["ffmpeg", "-hwaccel", "auto", "-ss", words[1],  "-i", words[0], "-t", words[2], "-c:v", "libx264", "-s", "1920x1080"];
                 reencode_cmd = ["-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "600k", "-movflags", "+faststart"];
 
@@ -52,30 +52,10 @@ def split(fname):
 
                     os.remove("tmp_" + output_filename); 
 
-# create a highlight file
-def create_highlight_film(name):
-    filmname = "highlight_" + name + ".mov";
-
-    for f in glob.glob(filmname):
-        os.remove(f);
-    file1 = open("mylist_" + name + ".txt", "w"); 
-    files = sorted(list(glob.glob("part*"+name+"*.MOV"))+ list(glob.glob("part*"+name+"*.mov")));
-    for item in files:
-        file1.write("file %s\n" %item);
-        # if item.endswith(".JPG") :
-        #    file1.write("duration 1\n");   
-    file1.close();
-
-    highlight_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_"+name+".txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", filmname];
-    subprocess.check_output(highlight_cmd);
-
-    reencode_cmd = ["ffmpeg", "-hwaccel", "auto", "-y", "-i", filmname, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "600k", "-vf", "format=yuv420p", "-movflags", "+faststart", "final_" + filmname];
-    subprocess.check_output(reencode_cmd);
-
 ##cleanup();
 parser = argparse.ArgumentParser()
 parser.add_argument('input_filename', nargs='?', default='default.csv', help='Input file name')
-parser.add_argument('--reel_type', default='highlight', help='Reel type', required=False)
+parser.add_argument('--reel_type', help='Reel type', required=False)
 parser.add_argument('--clean', action='store_true', help='Clean up before processing', required=False)
 parser.add_argument('--only_clean', action='store_true', help='Only clean up', required=False)
 
