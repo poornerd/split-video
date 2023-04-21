@@ -4,32 +4,21 @@ import os
 import glob
 import csv
 import sys
+import argparse
 
-# cleanup
-def cleanup():
-    for f in glob.glob("part*.MOV"):
-        os.remove(f);
-    for f in glob.glob("part*.mov"):
-        os.remove(f);        
-    for f in glob.glob("tmp_part*.MOV"):
-        os.remove(f);
-    for f in glob.glob("tmp_part*.mov"):
-        os.remove(f);
-    for f in glob.glob("part*.JPG"):
-        os.remove(f);  
-    for f in glob.glob("part*.jpg"):
-        os.remove(f);                   
+from cleanup import cleanup               
 
 # split files
 def split(fname):
     with open(fname) as f:
         times = csv.reader(f, delimiter=';');
         line_count = 0;
+        basename = os.path.splitext(os.path.basename(fname))[0] # extract base filename without extension
         for words in times:
             line_count = line_count + 1;
             print(words);
-            output_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".MOV";
-            highlight_filename = "part_" + str(line_count).zfill(4) + "_" + words[3] + ".jpg";
+            output_filename = "part_" + basename + "_" +str(line_count).zfill(4) + "_" + words[3] + ".MOV";
+            highlight_filename = "part_" + basename + "_" + str(line_count).zfill(4) + "_" + words[3] + ".jpg";
             if not os.path.exists(output_filename) :
                 if words[4] and words[5]:
                     arrow_cmd = ["-vf", "drawtext=text='^':enable='between(t,0,.2)':x=" + words[4] + ":y=" + words[5] + ":fontsize=166:fontcolor=red,loop=40:1,format=yuv420p"];
@@ -60,33 +49,6 @@ def split(fname):
                 subprocess.check_output(extract_img_cmd);
                 os.remove("tmp_" + output_filename); 
 
-# create the highlight file
-def create_highlight_film():
-    for f in glob.glob("highlight.MOV"):
-        os.remove(f);
-    file1 = open("mylist_all.txt", "w"); 
-    files = sorted(list(glob.glob("tmp_part*.MOV")) + list(glob.glob("tmp_part*.mov"))); # concat list with lower case?
-    for item in files:
-        file1.write("file %s\n" %item);
-    file1.close();
-
-    highlight_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_all.txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", "highlight.MOV"];
-    subprocess.check_output(highlight_cmd);
-
-
-# create the highlight file
-def create_goals_film():
-    for f in glob.glob("goals.MOV"):
-        os.remove(f);
-    file1 = open("mylist_goal.txt", "w"); 
-    files = sorted(list(glob.glob("tmp_part*goal*.MOV"))+ list(glob.glob("tmp_part*goal*.mov")));
-    for item in files:
-        file1.write("file %s\n" %item);
-    file1.close();
-
-    goals_cmd = ["ffmpeg", "-f" , "concat", "-safe", "0", "-i", "mylist_goal.txt", "-bsf:a", "aac_adtstoasc", "-fflags", "+genpts", "-c", "copy", "goals.MOV"];
-    subprocess.check_output(goals_cmd);
-
 # create a highlight file
 def create_highlight_film(name):
     filmname = "highlight_" + name + ".mov";
@@ -108,20 +70,23 @@ def create_highlight_film(name):
     subprocess.check_output(reencode_cmd);
 
 ##cleanup();
-if sys.argv[1]:
-    param_1= sys.argv[1];
-    if param_1 == "clean":
-        cleanup();
-        if sys.argv[2]:
-            input_filename= sys.argv[2];
-        if sys.argv[3]:
-            reel_type= sys.argv[3];
-    else:
-        input_filename = param_1;
-        if sys.argv[2]:
-            reel_type= sys.argv[2];
-        else:
-            reel_type= "highlight";
+parser = argparse.ArgumentParser()
+parser.add_argument('input_filename', nargs='?', default='default.csv', help='Input file name')
+parser.add_argument('--reel_type', default='highlight', help='Reel type', required=False)
+parser.add_argument('--clean', action='store_true', help='Clean up before processing', required=False)
+parser.add_argument('--only_clean', action='store_true', help='Only clean up', required=False)
+
+args = parser.parse_args()
+
+if args.only_clean:
+    cleanup()
+    sys.exit()
+elif args.clean:
+    cleanup()
+
+input_filename = args.input_filename
+reel_type = args.reel_type
 
 split(input_filename);
 create_highlight_film(reel_type);
+
