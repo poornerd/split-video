@@ -17,7 +17,7 @@ def split(fname):
         for words in times:
             line_count = line_count + 1;
             print(words);
-            output_filename = "part_" + basename + "_" +str(line_count).zfill(4) + "_" + words[3] + ".MOV";
+            output_filename = "part_" + basename + "_" +str(line_count).zfill(4) + "_" + words[3] + ".mov";
             highlight_filename = "part_" + basename + "_" + str(line_count).zfill(4) + "_" + words[3] + ".jpg";
             if not os.path.exists(output_filename) :
                 if words[4] and words[5]:
@@ -36,18 +36,21 @@ def split(fname):
                 ## reencode_cmd = ["ffmpeg", "-i", output_filename, "-c", "copy", "-bsf:v", "h264_mp4toannexb", "-f",  "mpegts", "tmp_" + output_filename];
                 ## subprocess.check_output(reencode_cmd);
 
-                x= 960;
-                if words[4]:
-                    x = int(words[4]);
-                y = 540;
-                if words[5]:    
-                    y = int(words[5]);
-                highlight_cmd = ["ffmpeg","-hwaccel", "auto", "-y", "-i", output_filename, "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':enable='between(t,0,.01)':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-c:a", "copy", "tmp_" + output_filename];
-                subprocess.check_output(highlight_cmd);
+                # Only extract JPG images if x and y values are present
+                if words[4] and words[5]:
+                    x= 960;
+                    if words[4]:
+                        x = int(words[4]);
+                    y = 540;
+                    if words[5]:    
+                        y = int(words[5]);
+                    highlight_cmd = ["ffmpeg","-hwaccel", "auto", "-y", "-i", output_filename, "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':enable='between(t,0,.01)':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-c:a", "copy", "tmp_" + output_filename];
+                    subprocess.check_output(highlight_cmd);
 
-                extract_img_cmd = ["ffmpeg","-hwaccel", "auto",  "-i",  "tmp_" + output_filename,  "-ss",  "00:00", "-vframes", "1",  highlight_filename];
-                subprocess.check_output(extract_img_cmd);
-                os.remove("tmp_" + output_filename); 
+                    extract_img_cmd = ["ffmpeg","-hwaccel", "auto",  "-i",  "tmp_" + output_filename,  "-vf", "drawtext=text='"+str(x) + ","+str(y) +"':x=" + str(x + 25) + ":y=" + str(y + 50) + ":fontsize=24:fontcolor=red", "-ss",  "00:00", "-vframes", "1",  highlight_filename];
+                    subprocess.check_output(extract_img_cmd);
+
+                    os.remove("tmp_" + output_filename); 
 
 # create a highlight file
 def create_highlight_film(name):
